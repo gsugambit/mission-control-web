@@ -139,6 +139,11 @@ const KanbanPage: React.FC = () => {
                     <span className="task-name">{task.name}</span>
                   </div>
                   <div className="task-footer">
+                    {(task.status === 'IN_REVIEW' || task.status === 'DONE') && (
+                      <span className="task-date" title={`Last modified: ${new Date(task.dateModified).toLocaleString()}`}>
+                        📅 {new Date(task.dateModified).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                      </span>
+                    )}
                     {task.assignedUserId && (
                       <span className="task-assignee" title={`Assigned to ${userMap[task.assignedUserId] || 'Unknown'}`}>
                         👤 {userMap[task.assignedUserId] || 'Unknown'}

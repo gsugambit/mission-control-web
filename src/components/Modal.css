@@ -101,6 +101,7 @@ form {
 .cancel-btn {
   background-color: #f8f9fa;
   border: 1px solid #ccc;
+  color: #333;
 }
 
 .cancel-btn:hover {
