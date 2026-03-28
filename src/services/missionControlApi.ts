@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { ProjectDto, TaskDto, UserDto } from '../types';
+import type { ProjectDto, TaskDto, UserDto, MissionStatus } from '../types';
 import { getEnv } from '../env';
 
 const rawBaseQuery = fetchBaseQuery({ 
@@ -70,6 +70,14 @@ export const missionControlApi = createApi({
       }),
       invalidatesTags: ['Task'],
     }),
+    updateTaskStatus: builder.mutation<TaskDto, { id: string; status: MissionStatus; blockedReason?: string }>({
+      query: ({ id, status, blockedReason }) => ({
+        url: `tasks/${id}/status/${status}`,
+        method: 'PATCH',
+        body: { blockedReason },
+      }),
+      invalidatesTags: ['Task'],
+    }),
     deleteUser: builder.mutation<void, string>({
       query: (id) => ({
         url: `users/${id}`,
@@ -95,6 +103,7 @@ export const {
   useCreateProjectMutation,
   useCreateTaskMutation,
   useUpdateTaskMutation,
+  useUpdateTaskStatusMutation,
   useDeleteUserMutation,
   useDeleteProjectMutation
 } = missionControlApi;

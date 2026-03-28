@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { useGetTasksQuery, useGetUsersQuery } from '../services/missionControlApi';
+import toast from 'react-hot-toast';
+import { 
+  useGetTasksQuery, 
+  useGetUsersQuery, 
+  useUpdateTaskStatusMutation 
+} from '../services/missionControlApi';
 import type { MissionStatus, TaskDto } from '../types';
 import CreateProjectModal from '../components/CreateProjectModal';
 import TaskModal from '../components/TaskModal';
@@ -10,9 +15,12 @@ const COLUMNS: MissionStatus[] = ['BACKLOG', 'READY', 'BLOCKED', 'IN_PROGRESS', 
 const KanbanPage: React.FC = () => {
   const { data: tasks, isLoading: isTasksLoading } = useGetTasksQuery();
   const { data: users, isLoading: isUsersLoading } = useGetUsersQuery();
+  const [updateTaskStatus] = useUpdateTaskStatusMutation();
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskDto | undefined>(undefined);
+  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [dragOverColumn, setDragOverColumn] = useState<MissionStatus | null>(null);
 
   if (isTasksLoading || isUsersLoading) {
     return <div className="loading">Loading board...</div>;
@@ -31,6 +39,60 @@ const KanbanPage: React.FC = () => {
   const handleCreateTaskClick = () => {
     setSelectedTask(undefined);
     setIsTaskModalOpen(true);
+  };
+  
+  const handleDragStart = (e: React.DragEvent, taskId: string) => {
+    setDraggedTaskId(taskId);
+    e.dataTransfer.setData('taskId', taskId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, column: MissionStatus) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverColumn !== column) {
+      setDragOverColumn(column);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverColumn(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, newStatus: MissionStatus) => {
+    e.preventDefault();
+    setDragOverColumn(null);
+    const taskId = e.dataTransfer.getData('taskId') || draggedTaskId;
+    setDraggedTaskId(null);
+
+    if (!taskId) return;
+
+    const task = tasks?.find(t => t.id === taskId);
+    if (!task || task.status === newStatus) return;
+
+    // Special handling for BLOCKED status - if it's a quick move, we might need a reason.
+    // For now, let's just use a default reason or prompt if possible, 
+    // but the requirement is "quickly change", so I'll use a default and they can edit it later.
+    const updatePayload: Partial<TaskDto> = {
+      id: taskId,
+      status: newStatus,
+    };
+
+    if (newStatus === 'BLOCKED' && !task.blockedReason) {
+      updatePayload.blockedReason = 'Status updated via drag and drop';
+    }
+
+    try {
+      await updateTaskStatus({
+        id: taskId,
+        status: newStatus,
+        blockedReason: updatePayload.blockedReason
+      }).unwrap();
+      toast.success(`Task moved to ${newStatus.replace('_', ' ')}`);
+    } catch (err) {
+      console.error('Failed to update task status:', err);
+      toast.error('Failed to move task');
+    }
   };
 
   const tasksByStatus = tasks?.reduce<Partial<Record<MissionStatus, TaskDto[]>>>((acc, task) => {
@@ -52,14 +114,27 @@ const KanbanPage: React.FC = () => {
       </div>
       <div className="kanban-board">
         {COLUMNS.map((column) => (
-          <div key={column} className={`kanban-column column-${column.toLowerCase()}`}>
+          <div 
+            key={column} 
+            className={`kanban-column column-${column.toLowerCase()} ${dragOverColumn === column ? 'drag-over' : ''}`}
+            onDragOver={(e) => handleDragOver(e, column)}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, column)}
+          >
             <h3 className="column-title">
               {column.replace('_', ' ')}
               <span className="task-count">{(tasksByStatus[column] || []).length}</span>
             </h3>
             <div className="task-list">
               {(tasksByStatus[column] || []).map((task) => (
-                <div key={task.id} className="task-card" onClick={() => handleTaskClick(task)}>
+                <div 
+                  key={task.id} 
+                  className={`task-card ${draggedTaskId === task.id ? 'is-dragging' : ''}`}
+                  onClick={() => handleTaskClick(task)}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, task.id)}
+                  onDragEnd={() => setDraggedTaskId(null)}
+                >
                   <div className="task-header">
                     <span className="task-name">{task.name}</span>
                   </div>
