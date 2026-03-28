@@ -10,3 +10,7 @@ All endpoints are enumerated in "../mission-control-service/ENDPOINTS.md"
 Please do not downgrade versions of docker file images or dependencies solely
 for the reason that you do not think they exist. You can be outdated and versions
 are totally valid even if you don't think they are. Always ask user to confirm if unsure.
+
+# Functionality Tracking
+There is a FUNCTIONALITY.md file in the root directory. When new functionality is being created
+that is available to an end user, update this file so we will have a running track of what's possible.
