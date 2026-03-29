@@ -13,7 +13,9 @@ import './AdminPage.css';
 const AdminPage: React.FC = () => {
   const [userName, setUserName] = useState('');
   const [projectName, setProjectName] = useState('');
+  const [projectPrefix, setProjectPrefix] = useState('');
   const [projectDescription, setProjectDescription] = useState('');
+  const [projectStatus, setProjectStatus] = useState('BACKLOG');
 
   const [createUser, { isLoading: isCreatingUser }] = useCreateUserMutation();
   const [createProject, { isLoading: isCreatingProject }] = useCreateProjectMutation();
@@ -41,16 +43,20 @@ const AdminPage: React.FC = () => {
 
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!projectName.trim()) return;
+    if (!projectName.trim() || !projectPrefix.trim()) return;
     try {
-      console.log('Creating project:', projectName);
+      console.log('Creating project:', projectName, projectPrefix, projectStatus);
       const result = await createProject({ 
-        name: projectName, 
-        description: projectDescription 
+        name: projectName,
+        prefix: projectPrefix,
+        description: projectDescription,
+        status: projectStatus as any
       }).unwrap();
       console.log('Project created:', result);
       setProjectName('');
+      setProjectPrefix('');
       setProjectDescription('');
+      setProjectStatus('BACKLOG');
       toast.success('Project created successfully!');
     } catch (err) {
       console.error('Failed to create project:', err);
@@ -141,6 +147,17 @@ const AdminPage: React.FC = () => {
               />
             </div>
             <div className="form-group">
+              <label htmlFor="projectPrefix">Project Prefix</label>
+              <input
+                id="projectPrefix"
+                type="text"
+                value={projectPrefix}
+                onChange={(e) => setProjectPrefix(e.target.value)}
+                placeholder="Enter project prefix (e.g. PRJ)"
+                required
+              />
+            </div>
+            <div className="form-group">
               <label htmlFor="projectDescription">Description</label>
               <textarea
                 id="projectDescription"
@@ -148,6 +165,21 @@ const AdminPage: React.FC = () => {
                 onChange={(e) => setProjectDescription(e.target.value)}
                 placeholder="Enter project description"
               />
+            </div>
+            <div className="form-group">
+              <label htmlFor="projectStatus">Status</label>
+              <select
+                id="projectStatus"
+                value={projectStatus}
+                onChange={(e) => setProjectStatus(e.target.value)}
+              >
+                <option value="BACKLOG">Backlog</option>
+                <option value="READY">Ready</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="BLOCKED">Blocked</option>
+                <option value="IN_REVIEW">In Review</option>
+                <option value="DONE">Done</option>
+              </select>
             </div>
             <button type="submit" disabled={isCreatingProject}>
               {isCreatingProject ? 'Creating...' : 'Create Project'}
@@ -160,7 +192,7 @@ const AdminPage: React.FC = () => {
               {projects?.map(project => (
                 <li key={project.id} className="admin-list-item">
                   <div className="project-info">
-                    <strong>{project.name}</strong>
+                    <strong>{project.name} ({project.prefix}) - {project.status}</strong>
                     <p>{project.description}</p>
                   </div>
                   <button 

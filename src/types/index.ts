@@ -10,6 +10,7 @@ export interface UserDto {
 export interface ProjectDto {
   id: string;
   name: string;
+  prefix: string;
   description: string;
   assignedUserId?: string;
   status: MissionStatus;

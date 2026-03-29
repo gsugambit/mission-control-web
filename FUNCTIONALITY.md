@@ -44,9 +44,9 @@ The Admin page provides tools for managing the foundational elements of the appl
 - **User List**: View all currently registered users.
 
 ### Project Management
-- **Create Project**: Add new projects with a name and detailed description.
+- **Create Project**: Add new projects with a name, unique prefix, detailed description, and status.
 - **Delete Project**: Remove existing projects.
-- **Project List**: View all current projects and their descriptions.
+- **Project List**: View all current projects and their descriptions, prefixes, and statuses.
 
 ## Notifications
 The application uses toast notifications to provide immediate feedback on user actions, such as successful creation, updates, or deletions, as well as error messages if an operation fails.

@@ -1,6 +1,11 @@
 # Description
 This application is the Web UI for [mission-control-service](https://github.com/gsugambit/mission-control-service)
 
+# Run
+```npm run dev```
+
+# Dockerize
+```DOCKER_BUILDKIT=1 docker build -t gambit-labs/mission-control-web:VERSION .```
 
 # React + TypeScript + Vite
 

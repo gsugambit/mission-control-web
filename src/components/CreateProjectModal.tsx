@@ -10,6 +10,7 @@ interface CreateProjectModalProps {
 
 const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ isOpen, onClose }) => {
   const [name, setName] = useState('');
+  const [prefix, setPrefix] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<MissionStatus>('BACKLOG');
   const [createProject, { isLoading }] = useCreateProjectMutation();
@@ -17,9 +18,10 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ isOpen, onClose
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await createProject({ name, description, status }).unwrap();
+      await createProject({ name, prefix, description, status }).unwrap();
       onClose();
       setName('');
+      setPrefix('');
       setDescription('');
       setStatus('BACKLOG');
     } catch (err) {
@@ -38,6 +40,17 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ isOpen, onClose
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="prefix">Project Prefix</label>
+          <input
+            id="prefix"
+            type="text"
+            value={prefix}
+            onChange={(e) => setPrefix(e.target.value)}
+            required
+            placeholder="e.g. PRJ"
           />
         </div>
         <div className="form-group">
