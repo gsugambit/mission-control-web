@@ -136,6 +136,7 @@ const KanbanPage: React.FC = () => {
                   onDragEnd={() => setDraggedTaskId(null)}
                 >
                   <div className="task-header">
+                    {task.taskCode && <span className="task-code">{task.taskCode}</span>}
                     <span className="task-name">{task.name}</span>
                   </div>
                   <div className="task-footer">

@@ -21,6 +21,7 @@ export interface ProjectDto {
 
 export interface TaskDto {
   id: string;
+  taskCode?: string;
   name: string;
   projectId: string;
   assignedUserId?: string;

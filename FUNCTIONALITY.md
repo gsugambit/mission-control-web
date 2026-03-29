@@ -26,8 +26,9 @@ The Kanban board is the central hub for managing tasks and quickly adding projec
   - **Done**: Completed tasks.
 - **Task Interaction**:
   - **Create Task**: Add new tasks directly from the board.
-  - **Edit Task**: Click on any task card to update its details (name, description, acceptance criteria, status, and assignee).
+  - **Edit Task**: Click on any task card to update its details (name, description, acceptance criteria, status, and assignee). The system-generated **Task Code** is visible but cannot be modified, and the **Project** cannot be changed after task creation.
   - **Assignment**: Tasks can be assigned to specific users.
+  - **Task Code**: Each task displays its system-generated **Task Code** on the Kanban card for easy identification.
   - **Drag and Drop**: Tasks can be dragged and dropped between columns to quickly update their status.
   - **Status Updates**: Tasks display the last modified date and time when in "In Review" or "Done" columns.
   - **Blocking**: When a task is moved to "Blocked", a reason must be provided, which is then displayed on the task card. (Note: A default reason is provided during quick drag-and-drop moves to ensure a smooth workflow).
