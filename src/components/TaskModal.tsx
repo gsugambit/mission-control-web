@@ -23,6 +23,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) => {
   const [status, setStatus] = useState<MissionStatus>('BACKLOG');
   const [assignedUserId, setAssignedUserId] = useState('');
   const [blockedReason, setBlockedReason] = useState('');
+  const [taskCode, setTaskCode] = useState('');
   
   const { data: projects } = useGetProjectsQuery();
   const { data: users } = useGetUsersQuery();
@@ -40,6 +41,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) => {
       setStatus(task.status || 'BACKLOG');
       setAssignedUserId(task.assignedUserId || '');
       setBlockedReason(task.blockedReason || '');
+      setTaskCode(task.taskCode || '');
     } else {
       // In create mode, default to the first project if available
       if (projects && projects.length > 0 && !projectId) {
@@ -53,6 +55,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) => {
       setStatus('BACKLOG');
       setAssignedUserId('');
       setBlockedReason('');
+      setTaskCode('');
     }
   }, [task, isOpen, projects]);
 
@@ -91,6 +94,18 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={isEditMode ? 'Edit Task' : 'Create New Task'}>
       <form onSubmit={handleSubmit}>
+        {isEditMode && taskCode && (
+          <div className="form-group">
+            <label htmlFor="taskCode">Task Code</label>
+            <input
+              id="taskCode"
+              type="text"
+              value={taskCode}
+              disabled
+              className="read-only-input"
+            />
+          </div>
+        )}
         <div className="form-group">
           <label htmlFor="name">Task Name</label>
           <input
@@ -108,6 +123,8 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) => {
             value={projectId}
             onChange={(e) => setProjectId(e.target.value)}
             required
+            disabled={isEditMode}
+            className={isEditMode ? 'read-only-input' : ''}
           >
             {(!projects || projects.length === 0) ? (
               <option value="">No projects available - please create one first</option>
