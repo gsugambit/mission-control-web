@@ -32,6 +32,7 @@ The Kanban board is the central hub for managing tasks and quickly adding projec
   - **Drag and Drop**: Tasks can be dragged and dropped between columns to quickly update their status.
   - **Status Updates**: Tasks display the last modified date and time when in "In Review" or "Done" columns.
   - **Blocking**: When a task is moved to "Blocked", a reason must be provided, which is then displayed on the task card. (Note: A default reason is provided during quick drag-and-drop moves to ensure a smooth workflow).
+  - **Comments**: View and add comments to a task from the edit modal to facilitate communication and updates.
 
 ### Project Creation
 - **Quick Create**: Projects can be created directly from the Kanban board header via a modal.
