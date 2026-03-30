@@ -32,3 +32,16 @@ export interface TaskDto {
   dateCreated: string;
   dateModified: string;
 }
+
+export interface TaskCommentDto {
+  id: string;
+  taskId: string;
+  userId: string;
+  comment: string;
+  dateCreated: string;
+  dateModified: string;
+}
+
+export interface TaskCommentCreateDto {
+  comment: string;
+}

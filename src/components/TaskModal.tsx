@@ -5,7 +5,9 @@ import {
   useCreateTaskMutation, 
   useUpdateTaskMutation, 
   useGetProjectsQuery, 
-  useGetUsersQuery 
+  useGetUsersQuery,
+  useGetTaskCommentsQuery,
+  useCreateTaskCommentMutation
 } from '../services/missionControlApi';
 import type { MissionStatus, TaskDto } from '../types';
 
@@ -24,11 +26,14 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) => {
   const [assignedUserId, setAssignedUserId] = useState('');
   const [blockedReason, setBlockedReason] = useState('');
   const [taskCode, setTaskCode] = useState('');
+  const [newComment, setNewComment] = useState('');
   
   const { data: projects } = useGetProjectsQuery();
   const { data: users } = useGetUsersQuery();
+  const { data: comments, isLoading: isCommentsLoading } = useGetTaskCommentsQuery(task?.id || '', { skip: !task?.id });
   const [createTask, { isLoading: isCreating }] = useCreateTaskMutation();
   const [updateTask, { isLoading: isUpdating }] = useUpdateTaskMutation();
+  const [createComment, { isLoading: isCreatingComment }] = useCreateTaskCommentMutation();
 
   const isEditMode = !!task;
 
@@ -90,6 +95,28 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) => {
       toast.error(`Failed to ${isEditMode ? 'update' : 'create'} task: ${errorMsg}`);
     }
   };
+
+  const handleAddComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!task || !newComment.trim()) return;
+
+    try {
+      await createComment({ 
+        taskId: task.id, 
+        body: { comment: newComment.trim() } 
+      }).unwrap();
+      setNewComment('');
+      toast.success('Comment added');
+    } catch (err) {
+      console.error('Failed to add comment:', err);
+      toast.error('Failed to add comment');
+    }
+  };
+
+  const userMap = users?.reduce<Record<string, string>>((acc, user) => {
+    acc[user.id] = user.userName;
+    return acc;
+  }, {}) || {};
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={isEditMode ? 'Edit Task' : 'Create New Task'}>
@@ -207,6 +234,45 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) => {
           </button>
         </div>
       </form>
+
+      {isEditMode && (
+        <div className="task-comments-section">
+          <hr />
+          <h3>Comments</h3>
+          <div className="comments-list">
+            {isCommentsLoading ? (
+              <p>Loading comments...</p>
+            ) : comments && comments.length > 0 ? (
+              comments.map(comment => (
+                <div key={comment.id} className="comment-item">
+                  <div className="comment-header">
+                    <strong>{userMap[comment.userId] || 'Unknown User'}</strong>
+                    <span className="comment-date">
+                      {new Date(comment.dateCreated).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="comment-body">
+                    {comment.comment}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p>No comments yet.</p>
+            )}
+          </div>
+          <form onSubmit={handleAddComment} className="add-comment-form">
+            <textarea
+              placeholder="Add a comment..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              required
+            />
+            <button type="submit" disabled={isCreatingComment || !newComment.trim()}>
+              {isCreatingComment ? 'Adding...' : 'Add Comment'}
+            </button>
+          </form>
+        </div>
+      )}
     </Modal>
   );
 };

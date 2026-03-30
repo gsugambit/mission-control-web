@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { ProjectDto, TaskDto, UserDto, MissionStatus } from '../types';
+import type { ProjectDto, TaskDto, UserDto, MissionStatus, TaskCommentDto, TaskCommentCreateDto } from '../types';
 import { getEnv } from '../env';
 
 const rawBaseQuery = fetchBaseQuery({ 
@@ -24,7 +24,7 @@ export const missionControlApi = createApi({
       throw err;
     }
   },
-  tagTypes: ['Project', 'Task', 'User'],
+  tagTypes: ['Project', 'Task', 'User', 'Comment'],
   endpoints: (builder) => ({
     getProjects: builder.query<ProjectDto[], void>({
       query: () => 'projects',
@@ -33,6 +33,10 @@ export const missionControlApi = createApi({
     getTasks: builder.query<TaskDto[], void>({
       query: () => 'tasks',
       providesTags: ['Task'],
+    }),
+    getTaskComments: builder.query<TaskCommentDto[], string>({
+      query: (taskId) => `tasks/${taskId}/comments`,
+      providesTags: (_result, _error, taskId) => [{ type: 'Comment', id: taskId }],
     }),
     getUsers: builder.query<UserDto[], void>({
       query: () => 'users',
@@ -61,6 +65,14 @@ export const missionControlApi = createApi({
         body: task,
       }),
       invalidatesTags: ['Task'],
+    }),
+    createTaskComment: builder.mutation<TaskCommentDto, { taskId: string; body: TaskCommentCreateDto }>({
+      query: ({ taskId, body }) => ({
+        url: `tasks/${taskId}/comments`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: (_result, _error, { taskId }) => [{ type: 'Comment', id: taskId }],
     }),
     updateTask: builder.mutation<TaskDto, Partial<TaskDto>>({
       query: (task) => ({
@@ -98,10 +110,12 @@ export const missionControlApi = createApi({
 export const { 
   useGetProjectsQuery, 
   useGetTasksQuery, 
+  useGetTaskCommentsQuery,
   useGetUsersQuery,
   useCreateUserMutation,
   useCreateProjectMutation,
   useCreateTaskMutation,
+  useCreateTaskCommentMutation,
   useUpdateTaskMutation,
   useUpdateTaskStatusMutation,
   useDeleteUserMutation,
